@@ -29,7 +29,10 @@
         <property name="entityManagerFactory" ref="entityManagerFactory" />
     </bean>
 
-    <jdbc:embedded-database id="dataSource" type="HSQL" />
+    <jdbc:embedded-database id="dataSource" type="HSQL">
+        <jdbc:script location="classpath:schema.sql"/>
+        <jdbc:script location="classpath:data.sql"/>
+    </jdbc:embedded-database>
     
 	<!-- This line makes the magic happen. This scans your classpath for generated repository candidates. -->    
     <jpa:repositories base-package="com.allingeek.demo.springdata.repository" />

@@ -38,7 +38,7 @@ public class DrinkTasks {
                     drink.getName(), 
                     drink.getPreparationTimeInMillis(), 
                     drink.getCost(), 
-                    drink.getCategory().getName()));
+                    (drink.getCategory() == null)? "Uncategorized" : drink.getCategory().getName()));
         }
         return output.toString();
     }

@@ -9,6 +9,7 @@
     	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 	
+	<context:annotation-config />
 	<!-- Setup your database infrastructure beans.  
 	    Here we are using a HSQL in-memory database for simplicity.  
 	    This DB is primed on startup by data.sql -->
@@ -37,5 +38,5 @@
 	<!-- This line makes the magic happen. This scans your classpath for generated repository candidates. -->    
     <jpa:repositories base-package="com.allingeek.demo.springdata.repository" />
     
-    
+    <bean class="com.allingeek.demo.springdata.TheBar"/>
 </beans>

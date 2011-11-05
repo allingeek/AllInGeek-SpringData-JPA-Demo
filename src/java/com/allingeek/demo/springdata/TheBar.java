@@ -28,87 +28,89 @@ import com.allingeek.demo.springdata.repository.specification.DrinkSpecification
 import com.allingeek.demo.springdata.task.DrinkTasks;
 
 public class TheBar {
-    private static Logger logger = LoggerFactory.getLogger(TheBar.class);
-    
+    private static Logger        logger = LoggerFactory.getLogger(TheBar.class);
+
     @Autowired
     private EntityManagerFactory emf;
     @Autowired
-    private DrinkRepository drinkRepository;
+    private DrinkRepository      drinkRepository;
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderRepository      orderRepository;
     @Autowired
-    private CategoryRepository categoryRepository;
-    
-    public void coolStuff() throws IllegalAccessException, InvocationTargetException, IOException {
+    private CategoryRepository   categoryRepository;
+
+    public void doExamples() throws IllegalAccessException, InvocationTargetException, IOException {
         // Lets add a new drink that we define
         Drink someNewDrink = new Drink();
         this.metamodelExploration(Drink.class, someNewDrink);
         drinkRepository.save(someNewDrink);
-        
+
         // Lets list all of the drinks
         List<Drink> drinks = drinkRepository.findAll();
         String ourDrinks = DrinkTasks.listDrinks(drinks);
         System.out.println(String.format("=================\nAll our drinks: \n%s", ourDrinks));
-        
+
         // Lets list all of the drinks that take a while to prep
         drinks = drinkRepository.findAll(DrinkSpecifications.takesLongToPrepare());
         String drinksThatTakeTime = DrinkTasks.listDrinks(drinks);
         System.out.println(String.format("=================\nAll our drinks that take forever: \n%s", drinksThatTakeTime));
 
         List<Category> categories = categoryRepository.findAll();
+        String categoryDrinks;
         if (!categories.isEmpty()) {
-            Category category = categories.get(0);
-            drinks = drinkRepository.findAllByCategory(category);
-            String drinksInASpecificCategory = DrinkTasks.listDrinks(drinks);
-            System.out.println(String.format("=================\nAll our drinks in the %s category: \n%s", category.getName(), drinksInASpecificCategory));
+            for(Category category : categories) {
+                drinks = drinkRepository.findAllByCategory(category);
+                categoryDrinks = DrinkTasks.listDrinks(drinks);
+                System.out.println(String.format("=================\nAll our drinks in the %s category: \n%s", category.getName(), categoryDrinks));
+            }
         } else {
             logger.error("There are no categories");
         }
     }
-    
+
     public void populateDrinks() {
         Category carribian = new Category();
         carribian.setName("Carribian");
         categoryRepository.save(carribian);
-        
+
         Category beer = new Category();
         beer.setName("Beer");
         categoryRepository.save(beer);
-        
-        DrinkTasks.createDrink(drinkRepository, "DarkAndStormy", 3000, "$8.50", carribian);
+
+        DrinkTasks.createDrink(drinkRepository, "Dark and Stormy", 3000, "$8.50", carribian);
         DrinkTasks.createDrink(drinkRepository, "Mojito", 20000, "$10.50", carribian);
         DrinkTasks.createDrink(drinkRepository, "IPA", 2000, "$5.50", beer);
         DrinkTasks.createDrink(drinkRepository, "Porter", 2000, "$4.50", beer);
         DrinkTasks.createDrink(drinkRepository, "Pale Ale", 2000, "$4.50", beer);
     }
-    
+
     private <T> T metamodelExploration(Class<T> clazz, T entity) throws IllegalAccessException, InvocationTargetException, IOException {
         Metamodel m = emf.getMetamodel();
         EntityType<T> dMM = m.entity(clazz);
-        Set<Attribute<T,?>> attrs = dMM.getDeclaredAttributes();
+        Set<Attribute<T, ?>> attrs = dMM.getDeclaredAttributes();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Class type;
-        for(Attribute<T,?> attribute : attrs) {
-            logger.debug(String.format("Attribute: %s (%s)", attribute.getName(), attribute.getJavaType()));
+        for (Attribute<T, ?> attribute : attrs) {
+            System.out.println(String.format("Attribute: %s (%s)", attribute.getName(), attribute.getJavaType()));
             System.out.print("Value: ");
             type = attribute.getJavaType();
-            if(type.equals(String.class)) {
+            if (type.equals(String.class)) {
                 BeanUtils.setProperty(entity, attribute.getName(), reader.readLine());
-            } else if(type.equals(Integer.class)) {
+            } else if (type.equals(Integer.class)) {
                 BeanUtils.setProperty(entity, attribute.getName(), Integer.parseInt(reader.readLine()));
             }
         }
         return entity;
     }
-    
+
     public static void main(String[] args) throws IllegalAccessException, InvocationTargetException, IOException {
         logger.info("Creating context.");
-        ApplicationContext ctx = new ClassPathXmlApplicationContext(new String[] {"context.xml"});
+        ApplicationContext ctx = new ClassPathXmlApplicationContext(new String[] { "context.xml" });
         logger.info("Context created.");
         TheBar bar = ctx.getBean(TheBar.class);
-        
+
         bar.populateDrinks();
-        bar.coolStuff();
+        bar.doExamples();
     }
 
 }
